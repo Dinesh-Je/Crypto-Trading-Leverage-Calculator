@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Leverage Calculator</title>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            position: relative;
+        }
+
+        .calculator {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .slider-container {
+            margin-top: 15px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            outline: none;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+
+        .result h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 10px 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 25px 0;
+        }
+
+        .stop-loss-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stop-loss-slider {
+            flex-grow: 1;
+        }
+
+        .stop-loss-input {
+            width: 80px;
+        }
+
+        .signature {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Crypto Trading Leverage Calculator</h1>
+        
+        <div class="input-group">
+            <label for="capital">Capital (USDT):</label>
+            <input type="number" id="capital" value="50" min="1" step="0.01">
+            <div class="description">This is the total amount of money you have for trading.</div>
+        </div>
+        
+        <div class="input-group">
+            <label for="margin">Margin:</label>
+            <div class="slider-container">
+                <input type="range" id="marginSlider" class="slider" min="0" max="100" value="5">
+                <div>Selected Margin: <span id="marginPercent">5</span>%</div>
+            </div>
+            <input type="number" id="marginAmount" value="2.50" min="0" step="0.01">
+            <div class="description">The amount you're putting into this trade.</div>
+        </div>
+        
+        <div class="input-group" id="riskSection">
+            <label for="risk">Risk:</label>
+            <div class="slider-container">
+                <input type="range" id="riskSlider" class="slider" min="1" max="100" value="50">
+                <div>Selected Risk: <span id="riskPercent">50</span>%</div>
+            </div>
+            <input type="number" id="riskAmount" value="1.25" min="0" step="0.01">
+            <div class="description">The portion of your margin you're willing to risk.</div>
+        </div>
+        
+        <div class="input-group">
+            <label for="stopLoss">Stop Loss %:</label>
+            <div class="stop-loss-controls">
+                <input type="range" id="stopLossSlider" class="slider stop-loss-slider" min="0.1" max="50" value="3.79" step="0.1">
+                <input type="number" id="stopLossInput" class="stop-loss-input" value="3.79" min="0.1" max="50" step="0.1">
+            </div>
+            <div class="description">Your trade's closing point to prevent further losses.</div>
+        </div>
+        
+        <hr>
+        
+        <button id="calculateBtn">Calculate Leverage</button>
+        
+        <div class="result" id="result">
+            <h3>Calculated Leverage</h3>
+            <div class="result-value" id="leverageValue"></div>
+        </div>
+    </div>
+
+    <div class="signature">made with love by Dje</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Get all DOM elements ---
+            const capitalInput = document.getElementById('capital');
+            const marginSlider = document.getElementById('marginSlider');
+            const marginPercent = document.getElementById('marginPercent');
+            const marginAmount = document.getElementById('marginAmount');
+            const riskSlider = document.getElementById('riskSlider');
+            const riskPercent = document.getElementById('riskPercent');
+            const riskAmount = document.getElementById('riskAmount');
+            const stopLossSlider = document.getElementById('stopLossSlider');
+            const stopLossInput = document.getElementById('stopLossInput');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultDiv = document.getElementById('result');
+            const leverageValue = document.getElementById('leverageValue');
+
+            // --- Helper Function ---
+            const getValues = () => ({
+                capital: parseFloat(capitalInput.value) || 0,
+                margin: parseFloat(marginAmount.value) || 0,
+                risk: parseFloat(riskAmount.value) || 0,
+                stopLoss: parseFloat(stopLossInput.value) || 0,
+            });
+
+            // --- Update Functions ---
+            function updateMarginAmount() {
+                const { capital } = getValues();
+                const marginPct = parseFloat(marginSlider.value);
+                const newMargin = capital * (marginPct / 100);
+                marginAmount.value = newMargin.toFixed(2);
+                updateRiskAmount();
+            }
+
+            function updateMarginSlider() {
+                const { capital, margin } = getValues();
+                if (capital > 0) {
+                    const newMarginPct = (margin / capital) * 100;
+                    if (newMarginPct >= 0 && newMarginPct <= 100) {
+                        marginSlider.value = newMarginPct;
+                        marginPercent.textContent = Math.round(newMarginPct);
+                    }
+                }
+                updateRiskAmount();
+            }
+
+            function updateRiskAmount() {
+                const { margin } = getValues();
+                const riskPct = parseFloat(riskSlider.value);
+                const newRisk = margin * (riskPct / 100);
+                riskAmount.value = newRisk.toFixed(2);
+            }
+
+            function updateRiskSlider() {
+                const { margin, risk } = getValues();
+                if (margin > 0) {
+                    const newRiskPct = (risk / margin) * 100;
+                    if (newRiskPct >= 1 && newRiskPct <= 100) {
+                        riskSlider.value = newRiskPct;
+                        riskPercent.textContent = Math.round(newRiskPct);
+                    }
+                }
+            }
+            
+            // --- Main Calculation ---
+            function calculateLeverage() {
+                const { margin, risk, stopLoss } = getValues();
+
+                if (margin <= 0) {
+                    alert("Margin amount must be greater than 0.");
+                    return;
+                }
+                if (risk <= 0) {
+                    alert("Risk amount must be greater than 0.");
+                    return;
+                }
+                if (stopLoss <= 0) {
+                    alert("Stop Loss percentage must be greater than 0.");
+                    return;
+                }
+
+                // CORRECT FORMULA: Leverage = Risk Amount / (Margin * (Stop Loss % / 100))
+                const leverage = risk / (margin * (stopLoss / 100));
+
+                leverageValue.textContent = leverage.toFixed(2) + "x";
+                resultDiv.style.display = 'block';
+            }
+
+            // --- Event Listeners ---
+            capitalInput.addEventListener('input', updateMarginAmount);
+
+            marginSlider.addEventListener('input', (e) => {
+                marginPercent.textContent = e.target.value;
+                updateMarginAmount();
+            });
+            marginAmount.addEventListener('input', updateMarginSlider);
+
+            riskSlider.addEventListener('input', (e) => {
+                riskPercent.textContent = e.target.value;
+                updateRiskAmount();
+            });
+            riskAmount.addEventListener('input', updateRiskSlider);
+
+            stopLossSlider.addEventListener('input', (e) => {
+                stopLossInput.value = parseFloat(e.target.value).toFixed(2);
+            });
+            stopLossInput.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                if (value >= 0.1 && value <= 50) {
+                    stopLossSlider.value = value;
+                }
+            });
+
+            calculateBtn.addEventListener('click', calculateLeverage);
+
+            // --- Initial Setup ---
+            updateMarginAmount();
+        });
+    </script>
+</body>
+</html>
